@@ -1,0 +1,64 @@
+public class Product
+{
+    private String name;
+    private double price;
+    private double weight;
+    private int quantity;
+    
+    //-----------------------------------------------------------------
+    //Product Constructor
+    public Product() {
+        name = "";
+        price = 0;
+        weight = 0;
+        quantity = 0;
+    }
+    
+    //Setting a name of a product 
+    public void setName(String nm) {
+        name = nm;
+    }
+    
+    //Method used to send name of a product
+    public String getName(){
+        return name;
+    }
+    
+    //Setting a price of a product 
+    public void setPrice(double prc) {
+        price = prc;
+    }
+    
+    //Method used to send price of a product
+    public double getPrice(){
+        return price;
+    }
+    
+    //Setting a weight of a product 
+    public void setWeight(double wgh) {
+        weight = wgh;
+    }
+    
+    //Method used to send price of a product
+    public double getWeight(){
+        return weight;
+    }
+    
+    //Setting a quantity of a product 
+    public void setQuantity(int quan) {
+        quantity = quan;
+    }
+    
+    //Method used to send quantity of a product
+    public int getQuantity(){
+        return quantity;
+    }
+    
+    //Setting a data of a product to zero
+    public void zeroData() {
+        name = "";
+        price = 0;
+        weight = 0;
+        quantity = 0;
+    }
+}

@@ -1,0 +1,41 @@
+public class Depot {
+	private Product[] products;
+	private String name = "";
+	private static int total = 0;
+	
+	public Depot() {
+		products = new Product[5];
+		for(int i = 0; i < 5; i++) {
+			products[i] = new Product();
+			total = 0;
+		}
+	}
+	
+	public void setName(String nm) {
+		name = nm;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void zeroData () {
+		name = "";
+		total = 0;
+		for (int i = 0; i < 5; i++) {
+			products[i].zeroData();
+		}
+	}
+	
+	public int getTotal() {
+		return total;
+	}
+	
+	public void productData(String nm, double prc, double wgh, int qtt) {
+		products[total].setName(nm);
+		products[total].setPrice(prc);
+		products[total].setWeight(wgh);
+		products[total].setQuantity(qtt);
+		total++;
+	}
+}

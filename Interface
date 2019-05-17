@@ -1,0 +1,233 @@
+import java.util.*;
+
+public class Interface {
+	static Scanner console = new Scanner(System.in);
+	private static int option;
+	private static Depot[] depots = new Depot[4];
+	private static int total = 0;
+	private static int choice = 0;
+
+	public static void main(String[] args) {
+		for (int i = 0; i < 4; i++) {
+			depots[i] = new Depot();
+		}
+		
+		do {
+			option = userChoice();
+			switch (option) {
+			case 0: //Creating Depots
+				creatingDepots();
+				break;
+			case 1: //Deleting Depots
+				deletingDepots();
+				break;
+			case 2: //Adding products to a depot
+				createProduct();
+				break;
+			case 3: //Removing a product from a depot
+				deleteProduct();
+				break;
+			case 4: //Return a list of depots
+				depotList();
+				break;
+			case 5: //Return a list of items in a depot
+				productsInDepot();
+				break;
+			case 6: //Check if an item, which user inputs, exists
+				productExist();
+				break;
+			case 7: //Return a sum of all products' prices
+				pricesSum();
+				break;
+			case 9: //Exit
+				option = 9;
+				break;
+			}
+
+			if (option != 9) {
+				option = exit();
+			}
+
+		} while (option != 9);
+	}
+
+	//----Menu options----------------------------------------
+	public static void creatingDepots() {
+		if (total <= 4) {
+			System.out.println("----Creating Depot----\n");
+			System.out.println("What would you like to call your depot?");
+			System.out.print("Name: ");
+			depots[total].setName(console.next());
+			System.out.println("The depot named " + depots[total].getName() + " has been added");
+			total++;
+		}
+		else {
+			System.out.println("Can not add more than 4 depots");
+		}
+	}
+
+	public static void deletingDepots() {
+		System.out.println("----Deleting Depot----\n");
+		System.out.println("Which depot would you like to delete?");
+		for (int i = 0; i < total; i++) {
+			System.out.println(i + ". " + depots[i].getName());
+		}
+		System.out.print("Choose a number next to the depot: ");
+		choice = console.nextInt();
+		while (choice < 0 || choice > total) {
+			System.out.println("Only choose from given numbers");
+			System.out.print("Your input: ");
+			choice = console.nextInt();
+		}
+		System.out.println("Depot " + depots[choice].getName() + " and its contents have been erased");
+		depots[choice].zeroData();
+		for (int i = choice; i < 3; i++) {
+			depots[i] = depots[i + 1];
+		}
+		total--;
+	}
+
+	public static void createProduct() {
+		System.out.println("----Adding a product to a depot----\n");
+		if (total == 0) {
+			System.out.println("No depots exist");
+		}
+		else {
+			System.out.println("Choose depot you would like to add a product to: ");
+			for (int i = 0; i < total; i++) {
+				System.out.println(i + ". " + depots[i].getName());
+			}
+			System.out.print("Choose a number next to the depot: ");
+			choice = console.nextInt();
+			while (choice < 0 || choice > total) {
+				System.out.println("Only choose from given numbers");
+				System.out.print("Your input: ");
+				choice = console.nextInt();
+			}
+			if (depots[choice].getTotal() == 5) {
+				System.out.println("Can not add any more products");
+			}
+			else {
+				System.out.print("Name of the product: ");
+				String nm = console.next();
+				System.out.print("Price of the product: ");
+				Double prc = console.nextDouble();
+				System.out.print("Weight of the product: ");
+				Double wgh = console.nextDouble();
+				System.out.print("Quantity of the product: ");
+				int qtt = console.nextInt();
+
+				depots[choice].productData(nm, prc, wgh, qtt);
+
+				System.out.println(nm + " was added to the depot " + depots[choice]);
+			}
+		}
+	}
+
+	public static void deleteProduct() {
+		System.out.println("----Removing a product from a depot----\n");
+		if (total == 0) {
+			System.out.println("No depots to delete from");
+		}
+		else {
+			System.out.println("Choose depot you would like to delete a product from: ");
+			for (int i = 0; i < total; i++) {
+				System.out.println(i + ". " + depots[i].getName());
+			}
+			System.out.print("Choose a number next to the depot: ");
+			choice = console.nextInt();
+			while (choice < 0 || choice > total) {
+				System.out.println("Only choose from given numbers");
+				System.out.print("Your input: ");
+				choice = console.nextInt();
+			}
+			if (depots[choice].getTotal() == 0) {
+				System.out.println("No products present in a depot");
+			}
+			else {
+				System.out.println("Which product would you like to delete?");
+				for (int i = 0; i < depots[choice].getTotal(); i++) {
+					System.out.println(i + ". " + depots[i].getName());
+				}
+				
+				System.out.print("Choose a number next to the product: ");
+				int choice2 = console.nextInt();
+				while (choice2 < 0 || choice2 > depots[choice].getTotal()) {
+					System.out.println("Only choose from given numbers");
+					System.out.print("Your input: ");
+					choice2 = console.nextInt();
+				}
+				
+				depots[choice].products[choice2].zeroData();
+			}
+		}
+	}
+
+	public static void depotList() {
+		System.out.println("----List of Depots----\n");
+	}
+
+	public static void productsInDepot() {
+		System.out.println("----List of items in a Depot----\n");
+	}
+
+	public static void productExist() {
+		System.out.println("----Query about a product's presence in the depots----\n");
+	}
+
+	public static void pricesSum() {
+		System.out.println("----Sum of all prices in all Depots----\n");
+	}
+
+	//----Menu interaction methods----------------------------
+	public static int userChoice() {
+		System.out.println("\n------------------------------------------");
+		System.out.print("What would you like to do? ");
+		System.out.println("Choose a number and press enter.");
+		System.out.println("(0) Add a depot");
+		System.out.println("(1) Remove a depot");
+		System.out.println("(2) Add a product to a depot");
+		System.out.println("(3) Remove one item from a depot");
+		System.out.println("(4) Query a list of depots");
+		System.out.println("(5) Query a list of items in a depot");
+		System.out.println("(6) Query about a product presence in a depot");
+		System.out.println("(7) Query a cumulative value of all products");
+		System.out.println("(9) Exit");
+
+		System.out.print("Your input: ");
+		int num = console.nextInt();
+
+		while(num < 0 || num > 9) {
+			System.out.println("Wrong input. Try again.");
+			System.out.print("Your input: ");
+			num = console.nextInt();
+		}
+
+		System.out.println("------------------------------------------\n");
+
+		return num;
+	}
+
+	public static int exit() {
+		System.out.println("\n------------------------------------------");
+		System.out.println("Would you like to do anything else?");
+		System.out.println("(1) Yes");
+		System.out.println("(2) No");
+		System.out.print("Your input: ");
+		int yesno = console.nextInt();
+		int temp = 0;
+		if (yesno == 1) {
+			temp = 0;
+		} else if (yesno == 2) {
+			temp = 9;
+		} else {
+			while (yesno != 1 && yesno != 2) {
+				System.out.println("Please input either 1 or 2");
+				System.out.print("Your input: ");
+				yesno = console.nextInt();
+			}
+		}
+		System.out.println("------------------------------------------");
+		return temp;
+	}
+}

@@ -1,4 +1,4 @@
-# depot
+# Depot Manager
 A tool to manage depots and product within them
 
 This tool has been created to manage up to 4 depots and 5 product within them.

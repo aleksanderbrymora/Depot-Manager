@@ -17,9 +17,18 @@ This program is written in Java.
 
 It uses console as an input and output.
 
+It also can use txt files as an input and output, but it has to follow this template:
+
+"DepotName" - to only create a depot without a product
+
+"DepotName" "ProductName" "Price" "Weight" "Quantity" - to create a depot with a product inside
+Program handles cases where for example if given depot with a name already exists it will add a product to it, 
+or when a product exists in a depot it will just add quantity.
+
 # What I learnt
 - Basics of java developement
 - Working with multiple Classes
 - Arrays
 - Basic optimisation
 - Writing output to the text file
+- Reading input from a text file

@@ -1,4 +1,7 @@
 import java.util.*;
+import java.io.*;
+
+//TODO Change dir of IO
 
 public class Interface {
 	static Scanner console = new Scanner(System.in);
@@ -7,11 +10,11 @@ public class Interface {
 	private static int total = 0;
 	private static int choice = 0;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		for (int i = 0; i < 4; i++) {
 			depots[i] = new Depot();
 		}
-		
+
 		do {
 			option = userChoice();
 			switch (option) {
@@ -39,16 +42,18 @@ public class Interface {
 			case 7: //Return a sum of all products' prices
 				pricesSum();
 				break;
-			case 9: //Exit
-				option = 9;
+			case 8: //Export depot and product information to a file
+				exportData();
+				break;
+			case 9: //Import depot and product information from a file. 
+				importData();
+				break;
+			case 10: //Exit
 				break;
 			}
+			System.out.println("------------------------------------------");
 
-			if (option != 9) {
-				option = exit();
-			}
-
-		} while (option != 9);
+		} while (option != 10);
 	}
 
 	//----Menu options----------------------------------------
@@ -57,9 +62,23 @@ public class Interface {
 			System.out.println("----Creating Depot----\n");
 			System.out.println("What would you like to call your depot?");
 			System.out.print("Name: ");
-			depots[total].setName(console.next());
-			System.out.println("The depot named " + depots[total].getName() + " has been added");
-			total++;
+			String tempName = console.next();
+			tempName.toLowerCase();
+			//Checking if there is a depot with that name
+			int nameFree = 0;
+			for (int i = 0; i < total; i++) {
+				if (tempName.equals(depots[i].getName())) {
+					nameFree++;
+				}
+			}
+			if (nameFree > 0) {
+				System.out.println("There is a depot with that name");
+			}
+			else {
+				depots[total].setName(tempName);
+				System.out.println("The depot named " + depots[total].getName() + " has been added");
+				total++;
+			}
 		}
 		else {
 			System.out.println("Can not add more than 4 depots");
@@ -68,58 +87,158 @@ public class Interface {
 
 	public static void deletingDepots() {
 		System.out.println("----Deleting Depot----\n");
-		System.out.println("Which depot would you like to delete?");
-		for (int i = 0; i < total; i++) {
-			System.out.println(i + ". " + depots[i].getName());
+		if (total != 0) {
+			System.out.println("Which depot would you like to delete?");
+			System.out.print("Input a name: ");
+			String nm = console.next();
+			nm.toLowerCase();
+			int match = 10;
+			for (int i = 0; i < total; i++) {
+				if (nm.contentEquals(depots[i].getName())) {
+					match = i;
+				}
+			}
+
+			if (match == 10) {
+				System.out.println("Depot with that name doesnt exist");
+			}
+			else {
+				System.out.println("Depot " + depots[match].getName() + " and its contents have been erased");
+				depots[match].zeroData();
+				for (int i = match; i < 3; i++) {
+					depots[i] = depots[i + 1];
+				}
+				total--;
+			}
 		}
-		System.out.print("Choose a number next to the depot: ");
-		choice = console.nextInt();
-		while (choice < 0 || choice > total) {
-			System.out.println("Only choose from given numbers");
-			System.out.print("Your input: ");
-			choice = console.nextInt();
+		else {
+			System.out.println("There are no depots to delete");
 		}
-		System.out.println("Depot " + depots[choice].getName() + " and its contents have been erased");
-		depots[choice].zeroData();
-		for (int i = choice; i < 3; i++) {
-			depots[i] = depots[i + 1];
-		}
-		total--;
 	}
 
 	public static void createProduct() {
+		/*
+		 * Checking if depots exist
+		 * *if not end
+		 * *if yes ask into which should a product be added
+		 * Asking for a name of a product
+		 * Checking if any products are in a depot
+		 * *if no then go straight to creating a new one
+		 * *if yes then:
+		 * Comparing names already existing in a chosen depot
+		 * *if a match is found ask only for a quantity and add it to existing product
+		 * *if not create a new one:
+		 * Name
+		 * price
+		 * weight
+		 * quantity
+		 * send to a chosen depot to create a new product 
+		 */
 		System.out.println("----Adding a product to a depot----\n");
 		if (total == 0) {
 			System.out.println("No depots exist");
 		}
 		else {
-			System.out.println("Choose depot you would like to add a product to: ");
+			System.out.println("Choose depot you would like to add a product to.");
+			System.out.print("Input a name: ");
+			String name = console.next();
+			name.toLowerCase();
+			int choice = 10;
 			for (int i = 0; i < total; i++) {
-				System.out.println(i + ". " + depots[i].getName());
+				if (name.contentEquals(depots[i].getName())) {
+					choice = i;
+				}
 			}
-			System.out.print("Choose a number next to the depot: ");
-			choice = console.nextInt();
-			while (choice < 0 || choice > total) {
-				System.out.println("Only choose from given numbers");
-				System.out.print("Your input: ");
-				choice = console.nextInt();
+			while (choice == 10) {
+				System.out.println("Depot with that name does not exist");
+				System.out.print("Input a name: ");
+				name = console.next();
+				name.toLowerCase();
+				choice = 10;
+				for (int i = 0; i < total; i++) {
+					if (name.contentEquals(depots[i].getName())) {
+						choice = i;
+					}
+				}
 			}
-			if (depots[choice].getTotal() == 5) {
-				System.out.println("Can not add any more products");
+
+			//Name
+			System.out.print("Name of the product: ");
+			String nm = console.next();
+			nm.toLowerCase();
+			
+			//checking if the product already exists in any depot
+			int matchDepot = 10;
+			int matchProduct = 10;
+			for (int i = 0; i < total; i++) {
+				int match = depots[i].productSearch(nm);
+				if (match != 10) {
+					matchDepot = i;
+					matchProduct = match;
+				}
+			}
+
+			//if function productSearch returns a value of 10 it means there was no match in names
+			if (matchProduct == 10) {
+				if (depots[choice].getTotal() == 5) {
+					System.out.println("Can not add more than 5 products.");
+				}
+				else {
+					//Price
+					System.out.print("Price of the product: ");
+					Double prc = console.nextDouble();
+					if (prc < 0) {
+						System.out.print("Price must be greater than zero");
+						System.out.print("Price of the product: ");
+						prc = console.nextDouble();
+					}
+					//Weight
+					System.out.print("Weight of the product: ");
+					Double wgh = console.nextDouble();
+					if (wgh < 0) {
+						System.out.print("Weight must be greater than zero");
+						System.out.print("Weight of the product: ");
+						wgh = console.nextDouble();
+					}
+					//Quantity
+					System.out.print("Quantity of the product: ");
+					int qtt = console.nextInt();
+					if (qtt < 0) {
+						System.out.print("Quantity must be greater than zero");
+						System.out.print("Quantity of the product: ");
+						qtt = console.nextInt();
+					}
+
+					depots[choice].productData(nm, prc, wgh, qtt);
+
+					System.out.println(nm + " was added to the depot " + depots[choice].getName());
+				}
+			}
+			else if (matchDepot != 10) {
+				System.out.print(nm + " already exists in a " + depots[matchDepot].getName());
+				System.out.println(depots[matchDepot].printPrcWgh(matchProduct));
+				System.out.print("Choose quantity you want to add: ");
+				int qtt = console.nextInt();
+				if (qtt <= 0) {
+					System.out.println("Quantity must be greater than zero");
+					System.out.print("Quantity of the product: ");
+					qtt = console.nextInt();
+				}
+				System.out.println(depots[matchDepot].addQuantity(qtt, matchProduct));
+				System.out.println(qtt + " products have been added");
 			}
 			else {
-				System.out.print("Name of the product: ");
-				String nm = console.next();
-				System.out.print("Price of the product: ");
-				Double prc = console.nextDouble();
-				System.out.print("Weight of the product: ");
-				Double wgh = console.nextDouble();
-				System.out.print("Quantity of the product: ");
+				System.out.print(nm + " already exists in a " + depots[choice].getName());
+				System.out.println(depots[choice].printPrcWgh(matchProduct));
+				System.out.print("Choose quantity you want to add: ");
 				int qtt = console.nextInt();
-
-				depots[choice].productData(nm, prc, wgh, qtt);
-
-				System.out.println(nm + " was added to the depot " + depots[choice]);
+				if (qtt <= 0) {
+					System.out.print("Quantity must be greater than zero");
+					System.out.print("Quantity of the product: ");
+					qtt = console.nextInt();
+				}
+				System.out.println(depots[choice].addQuantity(qtt, matchProduct));
+				System.out.println(qtt + " products have been added");
 			}
 		}
 	}
@@ -130,55 +249,300 @@ public class Interface {
 			System.out.println("No depots to delete from");
 		}
 		else {
-			System.out.println("Choose depot you would like to delete a product from: ");
+			//Getting an array place where name matches for given depot
+			System.out.println("Choose depot you would like to delete a product from.");
+			System.out.print("Input a name: ");
+			String name = console.next();
+			name.toLowerCase();
+			int choice = 10;
 			for (int i = 0; i < total; i++) {
-				System.out.println(i + ". " + depots[i].getName());
+				if (name.contentEquals(depots[i].getName())) {
+					choice = i;
+				}
 			}
-			System.out.print("Choose a number next to the depot: ");
-			choice = console.nextInt();
-			while (choice < 0 || choice > total) {
-				System.out.println("Only choose from given numbers");
-				System.out.print("Your input: ");
-				choice = console.nextInt();
+			while (choice == 10) {
+				System.out.println("Depot with that name does not exist");
+				System.out.print("Input a name: ");
+				name = console.next();
+				name.toLowerCase();
+				choice = 10;
+				for (int i = 0; i < total; i++) {
+					if (name.contentEquals(depots[i].getName())) {
+						choice = i;
+					}
+				}
 			}
-			if (depots[choice].getTotal() == 0) {
-				System.out.println("No products present in a depot");
+
+			//Getting an array place where name matches for given product
+			if (depots[choice].getTotal() != 0) {
+				System.out.println("Choose a product you would like to delete from that depot.");
+				System.out.print("Input a name: ");
+				String nameProduct = console.next();
+				nameProduct.toLowerCase();
+				int choiceProduct = 10;
+				for (int i = 0; i < depots[i].getTotal(); i++) {
+					int temp = depots[i].productSearch(nameProduct);
+					if (temp != 10) {
+						choiceProduct = temp;
+					}
+				}
+				while (choiceProduct == 10) {
+					System.out.println("Product with that name does not exist");
+					System.out.print("Input a name: ");
+					nameProduct = console.next();
+					nameProduct.toLowerCase();
+					choiceProduct = 10;
+					for (int i = 0; i < depots[i].getTotal(); i++) {
+						int temp = depots[i].productSearch(nameProduct);
+						if (temp != 10) {
+							choiceProduct = temp;
+						}
+					}
+				}
+
+				//Asking for quantity to remove
+				System.out.print("Choose quantity you want to delete: ");
+				int qtt = console.nextInt();
+				while (qtt < 0) {
+					System.out.println("Quantity must be greater than zero");
+					System.out.print("Quantity of the product: ");
+					qtt = console.nextInt();
+				}
+
+				System.out.println(depots[choice].deleteQtt(qtt, choiceProduct, depots[choice].getName()));
 			}
 			else {
-				System.out.println("Which product would you like to delete?");
-				for (int i = 0; i < depots[choice].getTotal(); i++) {
-					System.out.println(i + ". " + depots[i].getName());
-				}
-				
-				System.out.print("Choose a number next to the product: ");
-				int choice2 = console.nextInt();
-				while (choice2 < 0 || choice2 > depots[choice].getTotal()) {
-					System.out.println("Only choose from given numbers");
-					System.out.print("Your input: ");
-					choice2 = console.nextInt();
-				}
-				
-				depots[choice].products[choice2].zeroData();
+				System.out.println("There are no products in that depot");
 			}
 		}
 	}
 
 	public static void depotList() {
 		System.out.println("----List of Depots----\n");
+		if (total == 0) {
+			System.out.println("There are no depots");
+		}
+		else {
+			for (int i = 0; i < total; i++) {
+				System.out.println(depots[i].getName() + " has " + depots[i].getTotal() + " products.");
+			}
+		}
 	}
 
 	public static void productsInDepot() {
 		System.out.println("----List of items in a Depot----\n");
+		if (total == 0) {
+			System.out.println("No depots were created");
+		}
+		else {
+			//to get the depot to print a list from
+			System.out.println("Choose which depot you would like a list of product from");
+			System.out.print("Input a name: ");
+			String nameDepot = console.next();
+			nameDepot.toLowerCase();
+			int choiceDepot = 10;
+			for (int i = 0; i < total; i++) {
+				if (nameDepot.contentEquals(depots[i].getName())) {
+					choiceDepot = i;
+				}
+			}
+			while (choiceDepot == 10) {
+				System.out.println("Depot with that name does not exist");
+				System.out.print("Input a name: ");
+				nameDepot = console.next();
+				nameDepot.toLowerCase();
+				choiceDepot = 10;
+				for (int i = 0; i < total; i++) {
+					if (nameDepot.contentEquals(depots[i].getName())) {
+						choiceDepot = i;
+					}
+				}
+			}
+			
+			//printing a list of all the products
+			if (depots[choiceDepot].getTotal() == 0) {
+				System.out.println("No products in that depot");
+			}
+			else {
+				for (int i = 0; i < depots[choiceDepot].getTotal(); i++) {
+					System.out.println(depots[choiceDepot].productList(i));
+				}
+			}
+		}
 	}
 
 	public static void productExist() {
 		System.out.println("----Query about a product's presence in the depots----\n");
+		if (total == 0) {
+			System.out.print("There are no depots");
+		}
+		else {
+			System.out.println("What is the name of the product you would like to search for?");
+			System.out.print("Your input: ");
+			String name = console.next();
+			name.toLowerCase();
+			int match = 0;
+			for (int i = 0; i < total; i++) {
+				if (depots[i].productSearch(name) < 10) {
+					System.out.println("In " + depots[i].getName() + " there is " + name + " with quantity " + depots[i].getProductQtt(depots[i].productSearch(name)));
+					match++;
+				}
+			}
+			if (match == 0) {
+				System.out.println("There were no products in any of the depots");
+			}
+		}
 	}
 
 	public static void pricesSum() {
-		System.out.println("----Sum of all prices in all Depots----\n");
+		System.out.println("----Sum of all prices in a Depot----\n");
+		System.out.println("Choose which depot you would like a cumulative price from");
+		System.out.print("Input a name: ");
+		String nameDepot = console.next();
+		nameDepot.toLowerCase();
+		int choiceDepot = 10;
+		for (int i = 0; i < total; i++) {
+			if (nameDepot.contentEquals(depots[i].getName())) {
+				choiceDepot = i;
+			}
+		}
+		while (choiceDepot == 10) {
+			System.out.println("Depot with that name does not exist");
+			System.out.print("Input a name: ");
+			nameDepot = console.next();
+			nameDepot.toLowerCase();
+			choiceDepot = 10;
+			for (int i = 0; i < total; i++) {
+				if (nameDepot.contentEquals(depots[i].getName())) {
+					choiceDepot = i;
+				}
+			}
+		}
+		
+		System.out.println("Depot " + depots[choiceDepot].getName() + " has cumulative product value of $" + depots[choiceDepot].cumulativePrice());
+		
 	}
 
+	public static void exportData() throws IOException {
+		System.out.println("Data will be exported into output.txt\n");
+		PrintWriter output = new PrintWriter("C:\\Users\\Forsons\\eclipse-workspace\\depot\\src\\output.txt");
+		for (int i = 0; i < total; i++) {
+			if (depots[i].getTotal() == 0) {
+				output.println(depots[i].getName());
+			}
+			else {
+				output.print(depots[i].fileData());
+			}
+		}
+		output.close();
+	}
+
+	public static void importData() throws IOException {
+		//Input path that you want to scan for or a name of the file located in the same folder into the fileName variable
+		String fileName = "C:\\Users\\Forsons\\eclipse-workspace\\depot\\src\\input.txt";
+		Scanner input = new Scanner (new File (fileName));
+		
+		//Whole line to scan
+		String nextLine = "";
+		
+		//depot data
+		String depotName = "";
+		int depotPlace = 10;
+		
+		//product data
+		String productName = "";
+		double productPrice = 0;
+		double productWeight = 0;
+		int productQuantity = 0;
+		int productPlace = 10;
+		
+		//checks if there is a new line
+		while (input.hasNextLine()) {
+			//Reinitializing variables to store the place
+			depotPlace = 10;
+			productPlace = 10;
+			
+			//Scanning whole line to variable
+			nextLine = input.nextLine();
+			
+			System.out.println("-----------------------------------");
+			
+			//Creating new specific scanner for that line
+			Scanner line = new Scanner(nextLine);
+			
+			//reading first word as a name for a depot
+			depotName = line.next();
+			depotName.toLowerCase();
+			
+			//checking if depot with that name exists and if so storing the place in depotPlace
+			for (int i = 0; i < total; i++) {
+				if (depotName.contentEquals(depots[i].getName())) {
+					depotPlace = i;
+				}
+			}
+			
+			//if depot exists
+			if (depotPlace != 10) {
+				//checking if there is a product name, after depot name
+				if (line.hasNext()) {
+					productName = line.next();
+					productName.toLowerCase();
+					//checking if a product with that name exists
+					//if a match is present then adding just quantity
+					productPlace = depots[depotPlace].productSearch(productName);
+					if (productPlace != 10) {
+						productPrice = line.nextDouble();
+						productWeight = line.nextDouble();
+						productQuantity = line.nextInt();
+						depots[depotPlace].addQuantity(productQuantity, productPlace);
+						System.out.println("Added " + productQuantity + " " + productName + " to a " + depotName);
+					}
+					//if not present then check if in that depot there is enough space to add new product
+					else {
+						if (depots[depotPlace].getTotal() != 5) {
+							//adding new product
+							productPrice = line.nextDouble();
+							productWeight = line.nextDouble();
+							productQuantity = line.nextInt();
+							depots[depotPlace].productData(productName, productPrice, productWeight, productQuantity);
+							System.out.println(productQuantity + " " + productName + "s were added to " + depotName + " with a price $" + productPrice + " and weight " + productWeight + "kg.");
+						}
+						else {
+							System.out.println("Cannot add " + productName + " to " + depotName + ". This depot is full.");
+						}
+					}
+				}
+				else {
+					System.out.println("Depot with that name already exists.");
+				}
+			}
+			//if depot doesn't exist
+			else {
+				if (total != 4) {
+					depots[total].setName(depotName);
+					if (line.hasNext()) {
+						productName = line.next();
+						productPrice = line.nextDouble();
+						productWeight = line.nextDouble();
+						productQuantity = line.nextInt();
+						depots[total].productData(productName, productPrice, productWeight, productQuantity);
+						System.out.println("New depot with a name " + depotName + " was created");
+						System.out.println(productQuantity + " " + productName + "s were added to it with a price $" + productPrice + " and weight " + productWeight + "kg.");
+					}
+					else {
+						System.out.println("New depot with a name " + depotName + " was created");
+					}
+					total++;
+				}
+				else {
+					System.out.println("Cannot add any more depots.");
+				}
+			}
+			line.close();
+		}
+		input.close();
+	}
+	
 	//----Menu interaction methods----------------------------
 	public static int userChoice() {
 		System.out.println("\n------------------------------------------");
@@ -192,12 +556,14 @@ public class Interface {
 		System.out.println("(5) Query a list of items in a depot");
 		System.out.println("(6) Query about a product presence in a depot");
 		System.out.println("(7) Query a cumulative value of all products");
-		System.out.println("(9) Exit");
+		System.out.println("(8) Export depot and product information to a file");
+		System.out.println("(9) Import depot and product information from a file");
+		System.out.println("(10) Exit");
 
 		System.out.print("Your input: ");
 		int num = console.nextInt();
 
-		while(num < 0 || num > 9) {
+		while(num < 0 || num > 10) {
 			System.out.println("Wrong input. Try again.");
 			System.out.print("Your input: ");
 			num = console.nextInt();
@@ -206,28 +572,5 @@ public class Interface {
 		System.out.println("------------------------------------------\n");
 
 		return num;
-	}
-
-	public static int exit() {
-		System.out.println("\n------------------------------------------");
-		System.out.println("Would you like to do anything else?");
-		System.out.println("(1) Yes");
-		System.out.println("(2) No");
-		System.out.print("Your input: ");
-		int yesno = console.nextInt();
-		int temp = 0;
-		if (yesno == 1) {
-			temp = 0;
-		} else if (yesno == 2) {
-			temp = 9;
-		} else {
-			while (yesno != 1 && yesno != 2) {
-				System.out.println("Please input either 1 or 2");
-				System.out.print("Your input: ");
-				yesno = console.nextInt();
-			}
-		}
-		System.out.println("------------------------------------------");
-		return temp;
 	}
 }

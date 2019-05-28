@@ -1,14 +1,14 @@
 public class Depot {
 	private Product[] products;
 	private String name = "";
-	private static int total = 0;
+	private int total;
 	
 	public Depot() {
 		products = new Product[5];
 		for(int i = 0; i < 5; i++) {
 			products[i] = new Product();
-			total = 0;
 		}
+		total = 0;
 	}
 	
 	public void setName(String nm) {
@@ -37,5 +37,88 @@ public class Depot {
 		products[total].setWeight(wgh);
 		products[total].setQuantity(qtt);
 		total++;
+	}
+	
+	public void deleteProduct(int num) {
+		products[num].zeroData();
+		//moving products to occupy empty space
+		for (int i = num; i < total; i++) {
+			products[i] = products[i + 1];
+		}
+		total--;
+	}
+	
+	public int getProductQtt(int i) {
+		return products[i].getQuantity();
+	}
+	
+	public int cumulativePrice() {
+		int totalPrice = 0;
+		for (int i = 0; i < total; i++) {
+			totalPrice += products[i].getPrice();
+		}
+		return totalPrice;
+	}
+	
+	public String deleteQtt(int qtt, int match, String nm) {
+		int endQtt = products[match].getQuantity() - qtt;
+		String temp;
+		if (endQtt > 0) {
+			products[match].setQuantity(endQtt);
+			temp = qtt + " items of Product " + products[match].getName() + " removed from depot " + nm;
+		}
+		else if (endQtt == 0) {
+			deleteProduct(match);
+			temp = "Product has been deleted";
+		}
+		else {
+			temp = "You specified too many items to delete";
+		}
+		return temp;
+	}
+
+	//returns a place in which product exists if it exists, else returns 10
+	public int productSearch(String nm) {
+		int matchPlace = 10;
+		for (int i = 0; i < total; i++) {
+			if (nm.contentEquals(products[i].getName())) {
+				matchPlace = i;
+			}
+		}
+		
+		if (matchPlace != 10) {
+			return matchPlace;
+		}
+		else {
+			return 10;
+		}
+	}
+	
+	public String productList(int i) {
+		String temp;
+		temp = "Product " + products[i].getName() + " has price $" + products[i].getPrice() + ", weight " + products[i].getWeight() + "kg, and quantity " + products[i].getQuantity();
+		return temp;
+	}
+	
+	public String printPrcWgh(int match) {
+		String temp;
+		temp = " with price " + products[match].getPrice() + " and weight " + products[match].getWeight();
+		return temp;
+	}
+	
+	public String addQuantity(int qtt, int matchProduct) {
+		int tempQtt = products[matchProduct].getQuantity() + qtt;
+		String temp;
+		products[matchProduct].setQuantity(tempQtt);
+		temp = "There are " + products[matchProduct].getQuantity() + " of a " + products[matchProduct].getName();
+		return temp;
+	}
+	
+	public String fileData() {
+		String temp = "";
+		for (int i = 0; i < total; i++) {
+			temp += name + " " + products[i].getName() + " " + products[i].getPrice() + " " + products[i].getWeight() + " " + products[i].getQuantity() + "\n";
+		}
+		return temp;
 	}
 }

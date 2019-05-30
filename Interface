@@ -8,7 +8,6 @@ public class Interface {
 	private static int option;
 	private static Depot[] depots = new Depot[4];
 	private static int total = 0;
-	private static int choice = 0;
 
 	public static void main(String[] args) throws IOException {
 		for (int i = 0; i < 4; i++) {
@@ -58,7 +57,7 @@ public class Interface {
 
 	//----Menu options----------------------------------------
 	public static void creatingDepots() {
-		if (total <= 4) {
+		if (total != 4) {
 			System.out.println("----Creating Depot----\n");
 			System.out.println("What would you like to call your depot?");
 			System.out.print("Name: ");
@@ -495,7 +494,7 @@ public class Interface {
 						productWeight = line.nextDouble();
 						productQuantity = line.nextInt();
 						depots[depotPlace].addQuantity(productQuantity, productPlace);
-						System.out.println("Added " + productQuantity + " " + productName + " to a " + depotName);
+						System.out.println("Added " + productQuantity + " " + productName + "s to a " + depotName);
 					}
 					//if not present then check if in that depot there is enough space to add new product
 					else {
@@ -513,7 +512,7 @@ public class Interface {
 					}
 				}
 				else {
-					System.out.println("Depot with that name already exists.");
+					System.out.println(depotName + " already exists.");
 				}
 			}
 			//if depot doesn't exist
@@ -555,7 +554,7 @@ public class Interface {
 		System.out.println("(4) Query a list of depots");
 		System.out.println("(5) Query a list of items in a depot");
 		System.out.println("(6) Query about a product presence in a depot");
-		System.out.println("(7) Query a cumulative value of all products");
+		System.out.println("(7) Query a cumulative value of all products in a depot");
 		System.out.println("(8) Export depot and product information to a file");
 		System.out.println("(9) Import depot and product information from a file");
 		System.out.println("(10) Exit");
